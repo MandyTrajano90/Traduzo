@@ -15,6 +15,6 @@ class LanguageModel(AbstractModel):
         }
 
     @classmethod
-    def get_languages(cls, query: dict = {}):
+    def list_dicts(cls, query={}):
         languages = cls._collection.find(query)
-        return [cls(language) for language in languages]
+        return [LanguageModel(language).to_dict() for language in languages]
