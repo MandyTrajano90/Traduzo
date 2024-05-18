@@ -1,4 +1,5 @@
-from flask import Flask
+from flask import Flask, render_template
+from models.language_model import LanguageModel
 
 from controllers.admin_controller import admin_controller
 
@@ -11,6 +12,18 @@ app.template_folder = "views/templates"
 app.static_folder = "views/static"
 
 app.register_blueprint(admin_controller, url_prefix="/admin")
+
+
+@app.route("/")
+def index():
+    return render_template(
+        "index.html",
+        languages=LanguageModel.list_dicts(),
+        text_to_translate="O que deseja traduzir?",
+        translate_from="pt",
+        translate_to="en",
+        translated="What do you want to translate?",
+    )
 
 
 def start_server(host="0.0.0.0", port=8000):
