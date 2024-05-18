@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request
 from deep_translator import GoogleTranslator
+
 from models.language_model import LanguageModel
+from models.history_model import HistoryModel
 
 from controllers.admin_controller import admin_controller
+from controllers.history_controller import history_controller
 
 from os import environ
 from waitress import serve
@@ -13,6 +16,7 @@ app.template_folder = "views/templates"
 app.static_folder = "views/static"
 
 app.register_blueprint(admin_controller, url_prefix="/admin")
+app.register_blueprint(history_controller, url_prefix="/history")
 
 
 @app.route("/", methods=["GET"])
@@ -36,6 +40,14 @@ def translate():
     translated = GoogleTranslator(
         source=translate_from, target=translate_to
     ).translate(text_to_translate)
+
+    HistoryModel(
+        {
+            "text_to_translate": text_to_translate,
+            "translate_from": translate_from,
+            "translate_to": translate_to,
+        }
+    ).save()
 
     return render_template(
         "index.html",
