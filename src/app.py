@@ -9,6 +9,7 @@ from controllers.history_controller import history_controller
 
 from os import environ
 from waitress import serve
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -33,21 +34,25 @@ def index():
 
 @app.route("/", methods=["POST"])
 def translate():
+    if 'reverse' in request.form:
+        return reverse()
+    
     text_to_translate = request.form.get('text-to-translate')
     translate_from = request.form.get('translate-from')
     translate_to = request.form.get('translate-to')
 
-    translated = GoogleTranslator(
-        source=translate_from, target=translate_to
-    ).translate(text_to_translate)
+    translator = GoogleTranslator(source=translate_from, target=translate_to)
+    translated = translator.translate(text_to_translate)
 
-    HistoryModel(
-        {
-            "text_to_translate": text_to_translate,
-            "translate_from": translate_from,
-            "translate_to": translate_to,
+    history_record = HistoryModel({
+        "text": text_to_translate,
+        "translated_text": translated,
+        "translate_from": translate_from,
+        "translate_to": translate_to,
+        "timestamp": datetime.now()
         }
-    ).save()
+    )
+    history_record.save()
 
     return render_template(
         "index.html",
@@ -65,9 +70,17 @@ def reverse():
     translate_from = request.form.get('translate-from')
     translate_to = request.form.get('translate-to')
 
-    translated = GoogleTranslator(
-        source=translate_from, target=translate_to
-    ).translate(text_to_translate)
+    translator = GoogleTranslator(source=translate_from, target=translate_to)
+    translated = translator.translate(text_to_translate)
+
+    history_record = HistoryModel({
+        "text": text_to_translate,
+        "translated_text": translated,
+        "translate_from": translate_from,
+        "translate_to": translate_to,
+        "timestamp": datetime.now()
+    })
+    history_record.save()
 
     return render_template(
         "index.html",
